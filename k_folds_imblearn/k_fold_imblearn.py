@@ -56,7 +56,13 @@ class KFoldImblearn:
 
         return KFold(n_splits=self.k_folds, random_state=self.k_fold_random_state, shuffle=self.k_fold_shuffle)
 
+    def __repr__(self):
+        string_representation = f"KFoldImblearn Instance \n" \
+                                f"Sampling method: {self.sampling_method}\n" \
+                                f"Number of folds: {self.k_folds}"
+        return string_representation
+
 
 if __name__ == "__main__":
     k_fold_imblearn_object = KFoldImblearn(sampling_method="SMOTE", k_folds=3, k_fold_shuffle=True)
-    i = 0
+    print(k_fold_imblearn_object)
