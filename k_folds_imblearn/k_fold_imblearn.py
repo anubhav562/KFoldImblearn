@@ -10,6 +10,65 @@ from k_folds_imblearn.helper import (
 
 
 class KFoldImblearn:
+    """
+    KFoldImblearn
+
+    KFoldImblearn handles the resampling of data in a k fold fashion, taking care of
+    information leakage so that our results are not overly optimistic. It is built over
+    the imblearn package and is compatible with all the oversampling as well as under
+    sampling methods provided in the imblearn package
+
+    While performing over-sampling, under-sampling and balanced-sampling we need to make
+    sure that we are not touching/manipulating our validation or test set. Making changes
+    to our validation set can lead us to have results that are overly optimistic.
+    This over optimism of the results is called information leakage caused by the sampling
+    techniques applied to the test set as well.
+
+    In a typical holdout method (holdout simply means splitting data into test and train),
+    over-optimism can be handled by simply resampling the training data, training the models
+    on this resampled training data and finally testing it on the untouched test data.
+
+    But if we want to apply sampling techniques over k folds
+    (because we want to test our model over the k folds and want to have a
+    general idea of how it is performing), then we would have to frame the logic
+    and write the code ourselves. KFoldImblearn does the exact same process for us.
+
+    Parameters
+    ----------
+    sampling_method : string
+        The sampling method which is the user wants to apply to the data in a k-fold
+        fashion. Can take the following values:
+
+        "ADASYN", "BorderlineSMOTE", "KMeansSMOTE", "RandomOverSampler", "SMOTE",
+        "SMOTENC", "SVMSMOTE", "CondensedNearestNeighbour", "EditedNearestNeighbours",
+        "RepeatedEditedNearestNeighbours", "AllKNN", "InstanceHardnessThreshold", "NearMiss",
+        "NeighbourhoodCleaningRule", "OneSidedSelection", "RandomUnderSampler", "TomekLinks"
+
+        The above sampling methods contain both over and under sampling techniques contained
+        in the imblearn package.
+
+    sampling_params : dict, default=None
+        A parameter dictionary containing the arguments that will be fed to the sampling_method
+        mentioned above. For eg. if we decide to choose "SMOTE", then sampling_params will be a
+         dict of arguments that one will use while instantiating the SMOTE class
+
+    k_folds : int, default=5
+        Number of folds. Must be at least 2.
+
+    k_fold_shuffle : bool, default=False
+        Whether to shuffle the data before splitting into batches.
+        Note that the samples within each split will not be shuffled.
+
+    k_fold_random_state : int,  default=None
+        When `k_fold_shuffle` is True, `k_fold_random_state` affects the ordering of the
+        indices, which controls the randomness of each fold. Otherwise, this
+        parameter has no effect.
+
+    logging_level : int, default=50
+        logging level for the custom logger setup for this class.
+        values that can be assigned: 0, 10, 20, 30, 40 and 50
+
+    """
     def __init__(
             self, sampling_method: str, sampling_params: dict = None, k_folds: int = 5,
             k_fold_random_state: int = None, k_fold_shuffle: bool = False, logging_level: int = 50
