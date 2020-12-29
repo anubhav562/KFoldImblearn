@@ -1,3 +1,6 @@
+import logging
+from joblib import delayed, Parallel, wrap_non_picklable_objects
+
 from sklearn.model_selection import KFold
 from k_folds_imblearn.helper import (
     OVERSAMPLING_METHOD_LIST, SAMPLING_METHOD_NAME_TO_CLASS_MAPPING,  UNDER_SAMPLING_METHOD_LIST
@@ -5,7 +8,10 @@ from k_folds_imblearn.helper import (
 
 
 class KFoldImblearn:
-    def __init__(self, sampling_method, sampling_params=None, k_folds=5, k_fold_random_state=None, k_fold_shuffle=False):
+    def __init__(
+            self, sampling_method, sampling_params=None, k_folds=5, k_fold_random_state=None, k_fold_shuffle=False,
+            logging_level=50
+    ):
         if sampling_params is None:
             sampling_params = {}
 
@@ -22,6 +28,10 @@ class KFoldImblearn:
         self.__k_fold_object = self.__validate_and_instantiate_k_fold_object()
 
         self.k_fold_dataset_list = []
+
+        logging.basicConfig(level=logging_level)
+        self.__logger = logging.getLogger("KFoldImblearn")
+        self.__logger.setLevel(level=logging_level)
 
     @property
     def k_fold_object(self):
@@ -79,13 +89,43 @@ class KFoldImblearn:
         )
 
         if processing == "sequential":
+            self.__logger.info(msg="Starting resampling in a sequential manner!")
             self.__fit_resample_sequentially(X, y, k_fold_indices_tuple_list)
 
+        elif processing == "parallel":
+            self.__logger.info(msg="Starting resampling in a parallel manner!")
+            self.k_fold_dataset_list = \
+                Parallel(n_jobs=-1, verbose=50)(self.__fit_resample_parallel(X, y, kth_index_tuple) for kth_index_tuple in k_fold_indices_tuple_list)
+
         return self.k_fold_dataset_list
+
+    @delayed
+    @wrap_non_picklable_objects
+    def __fit_resample_parallel(self, X, y, kth_index_tuple):
+
+        training_indices = kth_index_tuple[0]
+        validation_indices = kth_index_tuple[1]
+
+        X_train = X.iloc[training_indices]
+        y_train = y.iloc[training_indices]
+
+        X_validation = X.iloc[validation_indices]
+        y_validation = y.iloc[validation_indices]
+
+        X_train_resample, y_train_resample = self.__sampling_method_object.fit_resample(X_train, y_train)
+
+        dataset_dict = {
+            "resampled_train_set": (X_train_resample, y_train_resample),
+            "validation_set": (X_validation, y_validation)
+        }
+
+        return dataset_dict
 
     def __fit_resample_sequentially(self, X, y, k_fold_indices_tuple_list):
 
         for index, kth_index_tuple in enumerate(k_fold_indices_tuple_list):
+            self.__logger.info(msg=f"Starting resampling for the {index+1}th fold!")
+
             training_indices = kth_index_tuple[0]
             validation_indices = kth_index_tuple[1]
 
@@ -98,8 +138,8 @@ class KFoldImblearn:
             X_train_resample, y_train_resample = self.__sampling_method_object.fit_resample(X_train, y_train)
 
             dataset_dict = {
-                f"{index+1}th_fold_resampled_train_set": (X_train_resample, y_train_resample),
-                f"{index + 1}th_fold_validation_set": (X_validation, y_validation)
+                "resampled_train_set": (X_train_resample, y_train_resample),
+                "validation_set": (X_validation, y_validation)
             }
 
             self.k_fold_dataset_list.append(dataset_dict)
@@ -108,7 +148,15 @@ class KFoldImblearn:
 if __name__ == "__main__":
     from sklearn.datasets import make_classification
     import pandas as pd
-    X, y = make_classification(n_samples=100000, weights=(0.2, ))
-    k_fold_imblearn_object = KFoldImblearn(sampling_method="SMOTE", k_folds=10, k_fold_shuffle=True)
-    k_fold_imblearn_object.k_fold_fit_resample(pd.DataFrame(X), pd.DataFrame(y))
+    from datetime import datetime
+
+    X, y = make_classification(n_samples=1000000, weights=(0.4, ))
+    k_fold_imblearn_object = KFoldImblearn(
+        sampling_method="RandomOverSampler", k_folds=10, k_fold_shuffle=True, logging_level=10
+    )
+    start_time = datetime.today()
+    k_fold_imblearn_object.k_fold_fit_resample(pd.DataFrame(X), pd.DataFrame(y), processing="parallel")
+    end_time = datetime.today()
+
+    print(f"Total time taken: {end_time-start_time}")
     print(k_fold_imblearn_object)
