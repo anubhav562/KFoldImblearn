@@ -1,8 +1,9 @@
 import logging
 import pandas as pd
-from joblib import delayed, Parallel, wrap_non_picklable_objects
 
+from joblib import delayed, Parallel, wrap_non_picklable_objects
 from sklearn.model_selection import KFold
+
 from k_folds_imblearn.helper import (
     OVERSAMPLING_METHOD_LIST, SAMPLING_METHOD_NAME_TO_CLASS_MAPPING,  UNDER_SAMPLING_METHOD_LIST
 )
@@ -86,6 +87,7 @@ class KFoldImblearn:
     def k_fold_fit_resample(
             self, X: pd.DataFrame, y: pd.DataFrame, processing: str = "sequential", n_jobs: int = 1, verbose: int = 0
     ):
+        self.__type_check_fit_resample_arguments(X, y, processing, n_jobs, verbose)
 
         k_fold_indices_tuple_list = (
             (training_indices, validation_indices) for training_indices, validation_indices in
@@ -103,6 +105,23 @@ class KFoldImblearn:
             )(self.__fit_resample_parallel(X, y, kth_index_tuple) for kth_index_tuple in k_fold_indices_tuple_list)
 
         return self.k_fold_dataset_list
+
+    @staticmethod
+    def __type_check_fit_resample_arguments(X, y, processing, n_jobs, verbose):
+        if type(X) != pd.DataFrame:
+            raise TypeError(f"X should of type: {pd.DataFrame}. Argument X passed is of the type: {type(X)}")
+
+        if type(y) != pd.DataFrame:
+            raise TypeError(f"y should of type: {pd.DataFrame}. Argument y passed is of the type: {type(y)}")
+
+        if processing not in ("sequential", "parallel"):
+            raise ValueError("processing can only have the following values: sequential and parallel")
+
+        if type(n_jobs) != int:
+            raise TypeError(f"n_jobs should of type: {int}. Argument n_jobs passed is of the type: {type(n_jobs)}")
+
+        if type(verbose) != int:
+            raise TypeError(f"verbose should of type: {int}. Argument verbose passed is of the type: {type(verbose)}")
 
     @delayed
     @wrap_non_picklable_objects
