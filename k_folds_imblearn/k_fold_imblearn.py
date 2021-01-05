@@ -143,16 +143,28 @@ class KFoldImblearn:
                                 f"Number of folds: {self.__k_folds}"
         return string_representation
 
-    def k_fold_fit_resample(
-            self, X: pd.DataFrame, y: pd.DataFrame, n_jobs: int = 1, verbose: int = 0
-    ):
+    def k_fold_fit_resample(self, X: pd.DataFrame, y: pd.DataFrame, n_jobs: int = 1, verbose: int = 0) -> list:
+        """
+        This method perform fit-resampling in a k fold fashion and returns the list containing 'k' datasets.
+
+        :param X: X dataframe containing all the attributes/features.
+        :param y: y dataframe containing all the labels.
+        :param n_jobs: no. of CPU cores the user wants to employ in the resampling process. set n_jobs = -1 to use
+                       all the CPU cores.
+        :param verbose: an integer value which enables logging of completion of tasks.
+        :return: list of dictionary containing 'k' datasets
+        """
+        # validation of the arguments passed in by the user
         self.__type_check_fit_resample_arguments(X, y, n_jobs, verbose)
 
-        k_fold_indices_tuple_list = (
+        # k tuples in the form of (training_indices, validation_indices)
+        k_fold_indices_tuple_list = [
             (training_indices, validation_indices) for training_indices, validation_indices in
             self.__k_fold_object.split(X, y)
-        )
+        ]
 
+        # joblib is used for spawning of multiple python processes
+        # if n_jobs = 1 SequentialBackend is used while LokyBackend is used for n_jobs=-1 or n_jobs > 1
         self.k_fold_dataset_list = Parallel(
             n_jobs=n_jobs, verbose=verbose
         )(self.__fit_resample_parallel(X, y, kth_index_tuple) for kth_index_tuple in k_fold_indices_tuple_list)
@@ -161,6 +173,14 @@ class KFoldImblearn:
 
     @staticmethod
     def __type_check_fit_resample_arguments(X, y, n_jobs, verbose):
+        """
+        This method is used to for the validation of the arguments passed in by the user.
+        :param X: should be a dataframe otherwise a TypeError is raised.
+        :param y: should be a dataframe otherwise a TypeError is raised.
+        :param n_jobs: should be an integer otherwise a TypeError is raised.
+        :param verbose: should be an integer otherwise a TypeError is raised.
+        :return: None
+        """
         if type(X) != pd.DataFrame:
             raise TypeError(f"X should of type: {pd.DataFrame}. Argument X passed is of the type: {type(X)}")
 
@@ -176,6 +196,17 @@ class KFoldImblearn:
     @delayed
     @wrap_non_picklable_objects
     def __fit_resample_parallel(self, X, y, kth_index_tuple):
+        """
+        This method has been decorated with the delayed and wrap_non_picklable_objects decorators
+        because this is used with the joblib's Parallel class.
+        This method simply re-samples the training data (and not the validation data).
+        It internally calls the fit_resample method of the sampling strategy that has been
+        chosen by the user.
+        :param X: The X dataframe provided by the user.
+        :param y: The y dataframe provided by the user.
+        :param kth_index_tuple: tuple in the form of (training_indices, validation_indices).
+        :return: a dictionary containing the resampled_training_set and validation_set.
+        """
 
         training_indices = kth_index_tuple[0]
         validation_indices = kth_index_tuple[1]
