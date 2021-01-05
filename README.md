@@ -1,9 +1,9 @@
 # KFoldImblearn
 
-KFoldImblearn handles the resampling of data in a k fold fashion, taking care of
-information leakage so that our results are not overly optimistic. It is built over
-the imblearn package and is compatible with all the oversampling as well as under
-sampling methods provided in the imblearn package.
+    KFoldImblearn handles the resampling of data in a k fold fashion, taking care of
+    information leakage so that our results are not overly optimistic. It is built over
+    the imblearn package and is compatible with all the oversampling as well as under
+    sampling methods provided in the imblearn package.
 
     While performing over-sampling, under-sampling and balanced-sampling we need to make
     sure that we are not touching/manipulating our validation or test set. Making changes
