@@ -144,37 +144,28 @@ class KFoldImblearn:
         return string_representation
 
     def k_fold_fit_resample(
-            self, X: pd.DataFrame, y: pd.DataFrame, processing: str = "sequential", n_jobs: int = 1, verbose: int = 0
+            self, X: pd.DataFrame, y: pd.DataFrame, n_jobs: int = 1, verbose: int = 0
     ):
-        self.__type_check_fit_resample_arguments(X, y, processing, n_jobs, verbose)
+        self.__type_check_fit_resample_arguments(X, y, n_jobs, verbose)
 
         k_fold_indices_tuple_list = (
             (training_indices, validation_indices) for training_indices, validation_indices in
             self.__k_fold_object.split(X, y)
         )
 
-        if processing == "sequential":
-            self.__logger.info(msg="Starting resampling in a sequential manner!")
-            self.__fit_resample_sequentially(X, y, k_fold_indices_tuple_list)
-
-        elif processing == "parallel":
-            self.__logger.info(msg="Starting resampling in a parallel manner!")
-            self.k_fold_dataset_list = Parallel(
-                n_jobs=n_jobs, verbose=verbose
-            )(self.__fit_resample_parallel(X, y, kth_index_tuple) for kth_index_tuple in k_fold_indices_tuple_list)
+        self.k_fold_dataset_list = Parallel(
+            n_jobs=n_jobs, verbose=verbose
+        )(self.__fit_resample_parallel(X, y, kth_index_tuple) for kth_index_tuple in k_fold_indices_tuple_list)
 
         return self.k_fold_dataset_list
 
     @staticmethod
-    def __type_check_fit_resample_arguments(X, y, processing, n_jobs, verbose):
+    def __type_check_fit_resample_arguments(X, y, n_jobs, verbose):
         if type(X) != pd.DataFrame:
             raise TypeError(f"X should of type: {pd.DataFrame}. Argument X passed is of the type: {type(X)}")
 
         if type(y) != pd.DataFrame:
             raise TypeError(f"y should of type: {pd.DataFrame}. Argument y passed is of the type: {type(y)}")
-
-        if processing not in ("sequential", "parallel"):
-            raise ValueError("processing can only have the following values: sequential and parallel")
 
         if type(n_jobs) != int:
             raise TypeError(f"n_jobs should of type: {int}. Argument n_jobs passed is of the type: {type(n_jobs)}")
@@ -203,26 +194,3 @@ class KFoldImblearn:
         }
 
         return dataset_dict
-
-    def __fit_resample_sequentially(self, X, y, k_fold_indices_tuple_list):
-
-        for index, kth_index_tuple in enumerate(k_fold_indices_tuple_list):
-            self.__logger.info(msg=f"Starting resampling for the {index+1}th fold!")
-
-            training_indices = kth_index_tuple[0]
-            validation_indices = kth_index_tuple[1]
-
-            X_train = X.iloc[training_indices]
-            y_train = y.iloc[training_indices]
-
-            X_validation = X.iloc[validation_indices]
-            y_validation = y.iloc[validation_indices]
-
-            X_train_resample, y_train_resample = self.__sampling_method_object.fit_resample(X_train, y_train)
-
-            dataset_dict = {
-                "resampled_train_set": (X_train_resample, y_train_resample),
-                "validation_set": (X_validation, y_validation)
-            }
-
-            self.k_fold_dataset_list.append(dataset_dict)
