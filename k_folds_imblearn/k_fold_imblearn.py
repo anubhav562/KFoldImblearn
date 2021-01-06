@@ -154,22 +154,41 @@ class KFoldImblearn:
         :param verbose: an integer value which enables logging of completion of tasks.
         :return: list of dictionary containing 'k' datasets
         """
-        # validation of the arguments passed in by the user
-        self.__type_check_fit_resample_arguments(X, y, n_jobs, verbose)
+        try:
+            # validation of the arguments passed in by the user
+            self.__type_check_fit_resample_arguments(X, y, n_jobs, verbose)
 
-        # k tuples in the form of (training_indices, validation_indices)
-        k_fold_indices_tuple_list = [
-            (training_indices, validation_indices) for training_indices, validation_indices in
-            self.__k_fold_object.split(X, y)
-        ]
+            # k tuples in the form of (training_indices, validation_indices)
+            k_fold_indices_tuple_list = [
+                (training_indices, validation_indices) for training_indices, validation_indices in
+                self.__k_fold_object.split(X, y)
+            ]
 
-        # joblib is used for spawning of multiple python processes
-        # if n_jobs = 1 SequentialBackend is used while LokyBackend is used for n_jobs=-1 or n_jobs > 1
-        self.k_fold_dataset_list = Parallel(
-            n_jobs=n_jobs, verbose=verbose
-        )(self.__fit_resample_parallel(X, y, kth_index_tuple) for kth_index_tuple in k_fold_indices_tuple_list)
+            # joblib is used for spawning of multiple python processes
+            # if n_jobs = 1 SequentialBackend is used while LokyBackend is used for n_jobs=-1 or n_jobs > 1
+            self.k_fold_dataset_list = Parallel(
+                n_jobs=n_jobs, verbose=verbose
+            )(self.__fit_resample_parallel(X, y, kth_index_tuple) for kth_index_tuple in k_fold_indices_tuple_list)
 
-        return self.k_fold_dataset_list
+            return self.k_fold_dataset_list
+
+        except OSError as oe:
+            self.__logger.critical(msg="----------- Terminated ------------")
+            self.__logger.critical(msg=f"OSError occurred: {oe}")
+            self.__logger.critical(
+                msg="If your system faces memory shortage or resource shortage, try reducing the n_jobs argument."
+            )
+
+        except MemoryError as me:
+            self.__logger.critical(msg="----------- Terminated ------------")
+            self.__logger.critical(msg=f"MemoryError occurred: {me}")
+            self.__logger.critical(
+                msg="If your system faces memory shortage or resource shortage, try reducing the n_jobs argument."
+            )
+
+        except Exception as e:
+            self.__logger.critical(msg="----------- Terminated ------------")
+            self.__logger.critical(msg=f"The following exception occurred: {e}")
 
     @staticmethod
     def __type_check_fit_resample_arguments(X, y, n_jobs, verbose):
