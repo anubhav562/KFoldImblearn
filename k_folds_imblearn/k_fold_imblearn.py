@@ -1,5 +1,6 @@
 import logging
 import pandas as pd
+import pickle
 
 from joblib import delayed, Parallel, wrap_non_picklable_objects
 from sklearn.model_selection import KFold
@@ -244,3 +245,11 @@ class KFoldImblearn:
         }
 
         return dataset_dict
+
+    def serialise_k_datasets_list(self, filepath):
+        try:
+            with open(filepath, mode='wb') as f:
+                pickle.dump(obj=self.k_fold_dataset_list, file=f)
+
+        except Exception as e:
+            self.__logger.critical(msg=f"The following exception occurred: {e}")
