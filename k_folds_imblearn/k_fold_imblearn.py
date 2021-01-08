@@ -246,10 +246,18 @@ class KFoldImblearn:
 
         return dataset_dict
 
-    def serialise_k_datasets_list(self, filepath):
+    def serialise_k_datasets_list(self, filepath, **kwargs):
+        """
+        This method is used for serialising the k_fold_dataset_list that has been resampled
+        using this library.
+
+        :param filepath: The file path where you want to store the dataset list.
+        :param kwargs: The keyword arguments which are passed to pickle dump method (these are optional).
+        :return: None
+        """
         try:
             with open(filepath, mode='wb') as f:
-                pickle.dump(obj=self.k_fold_dataset_list, file=f)
+                pickle.dump(obj=self.k_fold_dataset_list, file=f, **kwargs)
 
         except Exception as e:
             self.__logger.critical(msg=f"The following exception occurred: {e}")
