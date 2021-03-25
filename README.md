@@ -1,4 +1,4 @@
-# KFoldImblearn
+# KFoldImblearn Introduction
 
     KFoldImblearn handles the resampling of data in a k fold fashion, taking care of
     information leakage so that our results are not overly optimistic. It is built over
@@ -41,3 +41,58 @@ KFoldImblearn offers.
 
 ------------------------------------------------
 
+## Installation
+    
+    pip install -i https://test.pypi.org/simple/ Test-KFoldImblearn==1.0.6
+    
+If you get any third-party module errors while installing the package such as 
+**"could not find a version that satisfies the requirement <package_name>==X.X.X"**
+then simply pip install the package mentioned by using the command below:
+
+    pip install <package_name>==X.X.X
+    
+And then again try installing install KFoldImblearn
+
+
+## Example
+    
+```python
+from k_fold_imblearn import KFoldImblearn
+from sklearn.datasets import make_classification
+import pandas as pd
+from datetime import datetime
+
+# you can use your own X and y here, we have just made dummy data for the sake of example.
+X, y = make_classification(n_samples=10000, weights=(0.1, ))
+
+# instantiate KFoldImblearn by simply providing sampling_method and k_folds
+k_fold_imblearn_object = KFoldImblearn(
+        sampling_method="RandomOverSampler",
+        k_folds=10
+)
+
+start_time = datetime.today()
+
+# call the k_fold_fit_resample method by passing dataframe of X, y, verbose and n_jobs
+k_fold_imblearn_object.k_fold_fit_resample(pd.DataFrame(X), pd.DataFrame(y), verbose=10, n_jobs=8)
+
+end_time = datetime.today()
+
+print(f"Total time taken: {end_time-start_time}")
+print(k_fold_imblearn_object)
+```
+
+**Output**
+```
+[Parallel(n_jobs=8)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=8)]: Done   3 out of  10 | elapsed:    6.6s remaining:   15.6s
+[Parallel(n_jobs=8)]: Done   5 out of  10 | elapsed:    6.6s remaining:    6.6s
+[Parallel(n_jobs=8)]: Done   7 out of  10 | elapsed:    6.7s remaining:    2.8s
+[Parallel(n_jobs=8)]: Done  10 out of  10 | elapsed:    6.7s finished
+Total time taken: 0:00:07.035128
+KFoldImblearn Instance 
+Sampling method: RandomOverSampler
+Number of folds: 10
+
+Process finished with exit code 
+```
