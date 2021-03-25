@@ -19,3 +19,6 @@
     (because we want to test our model over the k folds and want to have a
     general idea of how it is performing), then we would have to frame the logic
     and write the code ourselves. KFoldImblearn does the exact same process for us.
+
+![alt text](https://github.com/anubhav562/KFoldImblearn/blob/main/docs/K_Fold_Imblearn_Banner.png?raw=True)
+
