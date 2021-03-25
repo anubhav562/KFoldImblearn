@@ -5,7 +5,7 @@ import pickle
 from joblib import delayed, Parallel, wrap_non_picklable_objects
 from sklearn.model_selection import KFold
 
-from helper import (
+from kfold_imblearn.helper import (
     OVERSAMPLING_METHOD_LIST, SAMPLING_METHOD_NAME_TO_CLASS_MAPPING,  UNDER_SAMPLING_METHOD_LIST
 )
 
