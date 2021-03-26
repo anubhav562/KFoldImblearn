@@ -39,9 +39,11 @@ just to the training data and let the validation data be as is.
 The correct way of performing Cross validation in a K-fold fashion is described above, and this is exactly what 
 KFoldImblearn offers.
 
+KFoldImblearn internally uses joblib to spawn multiple python processes so as to fasten the resampling of 
+various folds in a parallel fashion. The n_jobs parameter is used to specify the number of CPU cores we want to use.
 ------------------------------------------------
 
-## Installation
+### Installation
     
     pip install -i https://test.pypi.org/simple/ Test-KFoldImblearn==1.0.6
     
@@ -53,8 +55,58 @@ then simply pip install the package mentioned by using the command below:
     
 And then again try installing install KFoldImblearn
 
+### Instantiating
 
-## Example
+```python
+from k_fold_imblearn import KFoldImblearn
+
+k_fold_imblearn_object = KFoldImblearn(
+        sampling_method="RandomOverSampler",
+        k_folds=10,
+        k_fold_shuffle=True,
+        logging_level=10
+)
+
+"""
+Constructor Parameters
+    ----------
+    sampling_method : string
+        The sampling method which is the user wants to apply to the data in a k-fold
+        fashion. Can take the following values:
+
+        "ADASYN", "BorderlineSMOTE", "KMeansSMOTE", "RandomOverSampler", "SMOTE",
+        "SMOTENC", "SVMSMOTE", "CondensedNearestNeighbour", "EditedNearestNeighbours",
+        "RepeatedEditedNearestNeighbours", "AllKNN", "InstanceHardnessThreshold", "NearMiss",
+        "NeighbourhoodCleaningRule", "OneSidedSelection", "RandomUnderSampler", "TomekLinks"
+
+        The above sampling methods contain both over and under sampling techniques contained
+        in the imblearn package.
+
+    sampling_params : dict, default=None
+        A parameter dictionary containing the arguments that will be fed to the sampling_method
+        mentioned above. For eg. if we decide to choose "SMOTE", then sampling_params will be a
+         dict of arguments that one will use while instantiating the SMOTE class
+
+    k_folds : int, default=5
+        Number of folds. Must be at least 2.
+
+    k_fold_shuffle : bool, default=False
+        Whether to shuffle the data before splitting into batches.
+        Note that the samples within each split will not be shuffled.
+
+    k_fold_random_state : int,  default=None
+        When `k_fold_shuffle` is True, `k_fold_random_state` affects the ordering of the
+        indices, which controls the randomness of each fold. Otherwise, this
+        parameter has no effect.
+
+    logging_level : int, default=50
+        logging level for the custom logger setup for this class.
+        values that can be assigned: 0, 10, 20, 30, 40 and 50
+"""
+```
+
+
+### Complete Example
     
 ```python
 from k_fold_imblearn import KFoldImblearn
@@ -67,8 +119,10 @@ X, y = make_classification(n_samples=10000, weights=(0.1, ))
 
 # instantiate KFoldImblearn by simply providing sampling_method and k_folds
 k_fold_imblearn_object = KFoldImblearn(
-        sampling_method="RandomOverSampler",
-        k_folds=10
+        sampling_method="SMOTE",
+        k_folds=10,
+        k_fold_shuffle=True,
+        logging_level=10
 )
 
 start_time = datetime.today()
@@ -76,9 +130,20 @@ start_time = datetime.today()
 # call the k_fold_fit_resample method by passing dataframe of X, y, verbose and n_jobs
 k_fold_imblearn_object.k_fold_fit_resample(pd.DataFrame(X), pd.DataFrame(y), verbose=10, n_jobs=8)
 
-end_time = datetime.today()
+# accessing the re-sampled dataset list
+'''
+this dataset list is a list of length 'k', each element is a dictionary having 2 keys: "resampled_train_set" and 
+"validation_set". Both the keys contain a tuple of 2 DataFrames (X and y)
+'''
+dataset_list = k_fold_imblearn_object.k_fold_dataset_list  # classifier are applied to this list of datasets.
 
+# saving the dataset list as a pickle file
+k_fold_imblearn_object.serialise_k_datasets_list(filepath="dataset_list.pkl")
+
+end_time = datetime.today()
 print(f"Total time taken: {end_time-start_time}")
+
+# printing the object
 print(k_fold_imblearn_object)
 ```
 
