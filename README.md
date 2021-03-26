@@ -156,7 +156,7 @@ print(k_fold_imblearn_object)
 [Parallel(n_jobs=8)]: Done  10 out of  10 | elapsed:    6.7s finished
 Total time taken: 0:00:07.035128
 KFoldImblearn Instance 
-Sampling method: RandomOverSampler
+Sampling method: SMOTE
 Number of folds: 10
 
 Process finished with exit code 
