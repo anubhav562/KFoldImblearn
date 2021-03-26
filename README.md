@@ -41,6 +41,8 @@ KFoldImblearn offers.
 
 KFoldImblearn internally uses joblib to spawn multiple python processes so as to fasten the resampling of 
 various folds in a parallel fashion. The n_jobs parameter is used to specify the number of CPU cores we want to use.
+
+
 ------------------------------------------------
 
 ### Installation
