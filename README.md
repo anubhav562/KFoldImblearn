@@ -26,7 +26,7 @@
 
 Most of the people would perform up-sampling/down-sampling on the whole dataset, and then would apply
 K-Fold Cross Validation on the complete dataset. This is a wrong way as this approach is over-optimistic
-and lead to information leakage. The validation set should always be kept untouched, or in other words no 
+and leads to information leakage. The validation set should always be kept untouched, or in other words no 
 sampling should be applied to the validation set.
 
 The correct approach would be first splitting the data into multiple folds and then applying sampling
@@ -39,7 +39,7 @@ just to the training data and let the validation data be as is.
 The correct way of performing Cross validation in a K-fold fashion is described above, and this is exactly what 
 KFoldImblearn offers.
 
-KFoldImblearn internally uses joblib to spawn multiple python processes so as to fasten the resampling of 
+KFoldImblearn internally uses [joblib](https://joblib.readthedocs.io/en/latest/) to spawn multiple python processes so as to fasten the resampling of 
 various folds in a parallel fashion. The n_jobs parameter is used to specify the number of CPU cores we want to use.
 
 
@@ -163,3 +163,8 @@ Number of folds: 10
 
 Process finished with exit code 
 ```
+
+### References
+- Imblearn - https://imbalanced-learn.org/stable/
+- Joblib   - https://joblib.readthedocs.io/en/latest/
+- Pandas   - https://pandas.pydata.org/
