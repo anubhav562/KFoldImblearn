@@ -116,7 +116,7 @@ class KFoldImblearn:
             sampler_object = sampler_class_reference(**self.__sampling_params)
             return sampler_object
         except Exception as e:
-            print(f"Exception occurred: {e}")
+            self.__logger.critical(msg=f"Following exception occurred: {e}")
 
     def __validate_and_instantiate_k_fold_object(self):
         if type(self.__k_folds) != int:
