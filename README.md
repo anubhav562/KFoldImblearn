@@ -57,6 +57,12 @@ then simply pip install the package mentioned by using the command below:
     
 And then again try installing install KFoldImblearn
 
+If you get errors relating to imbalanced-learn package, try running this command:
+    
+    pip install -U imbalanced-learn
+    
+after this try pip installing KFoldImblearn again.
+
 ### Instantiating
 
 ```python
