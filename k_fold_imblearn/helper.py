@@ -7,16 +7,6 @@ from imblearn.under_sampling import (
     TomekLinks
 )
 
-OVERSAMPLING_METHOD_LIST = (
-    "ADASYN", "BorderlineSMOTE", "KMeansSMOTE", "RandomOverSampler", "SMOTE", "SMOTENC", "SVMSMOTE"
-)
-
-UNDER_SAMPLING_METHOD_LIST = (
-    "CondensedNearestNeighbour", "EditedNearestNeighbours", "RepeatedEditedNearestNeighbours", "AllKNN",
-    "InstanceHardnessThreshold", "NearMiss", "NeighbourhoodCleaningRule", "OneSidedSelection", "RandomUnderSampler",
-    "TomekLinks"
-)
-
 SAMPLING_METHOD_NAME_TO_CLASS_MAPPING = {
     "ADASYN": ADASYN,
     "BorderlineSMOTE": BorderlineSMOTE,

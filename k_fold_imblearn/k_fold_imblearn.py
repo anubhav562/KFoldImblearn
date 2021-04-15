@@ -5,9 +5,7 @@ import pickle
 from joblib import delayed, Parallel, wrap_non_picklable_objects
 from sklearn.model_selection import KFold
 
-from k_fold_imblearn.helper import (
-    OVERSAMPLING_METHOD_LIST, SAMPLING_METHOD_NAME_TO_CLASS_MAPPING,  UNDER_SAMPLING_METHOD_LIST
-)
+from k_fold_imblearn.helper import SAMPLING_METHOD_NAME_TO_CLASS_MAPPING
 
 
 class KFoldImblearn:
@@ -92,7 +90,7 @@ class KFoldImblearn:
         self.k_fold_dataset_list = []
 
         logging.basicConfig(level=logging_level)
-        self.__logger = logging.getLogger("KFoldImblearn")
+        self.__logger = logging.getLogger(f"KFoldImblearn_{sampling_method}")
         self.__logger.setLevel(level=logging_level)
 
     @property
@@ -104,10 +102,20 @@ class KFoldImblearn:
         return self.__sampling_method_object
 
     def __validate_sampling_method(self):
-        if self.__sampling_method not in OVERSAMPLING_METHOD_LIST + UNDER_SAMPLING_METHOD_LIST:
+        over_sampling_methods = (
+            "ADASYN", "BorderlineSMOTE", "KMeansSMOTE", "RandomOverSampler", "SMOTE", "SMOTENC", "SVMSMOTE"
+        )
+
+        under_sampling_methods = (
+            "CondensedNearestNeighbour", "EditedNearestNeighbours", "RepeatedEditedNearestNeighbours", "AllKNN",
+            "InstanceHardnessThreshold", "NearMiss", "NeighbourhoodCleaningRule", "OneSidedSelection",
+            "RandomUnderSampler", "TomekLinks"
+        )
+
+        if self.__sampling_method not in over_sampling_methods + under_sampling_methods:
             raise ValueError(
                 f"The value of sampling_method should be one of the following: "
-                f"{OVERSAMPLING_METHOD_LIST + UNDER_SAMPLING_METHOD_LIST}"
+                f"{over_sampling_methods + under_sampling_methods}"
             )
 
     def __prepare_sampler_object(self):
