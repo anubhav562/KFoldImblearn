@@ -47,7 +47,7 @@ various folds in a parallel fashion. The n_jobs parameter is used to specify the
 
 ### Installation
     
-    pip install -i https://test.pypi.org/simple/ Test-KFoldImblearn==1.0.6
+    pip install k-fold-imblearn
     
 If you get any third-party module errors while installing the package such as 
 **"could not find a version that satisfies the requirement <package_name>==X.X.X"**
@@ -62,6 +62,8 @@ If you get errors relating to imbalanced-learn package, try running this command
     pip install -U imbalanced-learn
     
 after this try pip installing KFoldImblearn again.
+
+    pip install k-fold-imblearn
 
 ### Instantiating
 

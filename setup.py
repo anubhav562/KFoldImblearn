@@ -8,7 +8,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="k_fold_imblearn",
-    version="1.0.8",
+    version="1.0.0",
     description="KFoldImblearn handles the resampling of data in a k fold fashion,"
                 " taking care of information leakage so that our results are not overly optimistic."
                 " It is built over the imblearn package and is compatible with all the oversampling"
